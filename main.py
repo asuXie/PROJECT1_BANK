@@ -18,8 +18,8 @@ class User:
 
 
         self.id = id
-        self._name = name
-        self._surname = surname
+        self._name = name.upper()
+        self._surname = surname.upper()
         self._balance = {
             "USD":0,
             "EUR":0,
@@ -39,7 +39,13 @@ class User:
             "PLN":False
                         }
         self.history = []
+
+        self.inHistoryFile("Account created")
+
+
+
         print("Twój numer karty", self._cardNumber)
+        
     
     def typeAssign(self, amount, variety, currency):
         result = (variety, amount, currency, dtNowString)
@@ -52,7 +58,7 @@ class User:
     def withdraw(self): #wypłata
         variety = "Withdrawal"
         currency = str(input("Wybierz rodzaj waluty: "))
-        currency.upper()
+        currency = currency.upper()
         withdrawal = float(input("Kwota do wypłacenia: "))
         withdrawal = round(withdrawal, 2)
         for key in self._currency:
@@ -63,12 +69,13 @@ class User:
                     self.typeAssign(variety, withdrawal, currency)
                     if self._balance[currency] == 0:
                         self._currency[currency] = False
+                        self.inHistoryFile(variety, currency, withdrawal)
                         
 
     def deposit(self): #wpłata
         variety = "Deposit"
         currency = str(input("Wybierz rodzaj waluty: "))
-        currency.upper()
+        currency = currency.upper()
         deposit = float(input("Kwota do wpłacenia: "))
         deposit = round(deposit, 2)
         for key in self._currency:
@@ -76,7 +83,8 @@ class User:
                 self._balance[currency] += deposit
                 self._currency[currency] = True
                 print("Operacja zakończona pomyślnie")
-                self.typeAssign(variety, deposit, currency)      
+                self.typeAssign(variety, deposit, currency)     
+                self.inHistoryFile(variety, currency, deposit) 
                    
 
     def userInfo(self): #info o użytkowniku
@@ -88,22 +96,25 @@ class User:
         for keys in self._balance:
             print(keys, "Kwota: ", self._balance[keys])
    
-    def currenciesAvailable(self, current):
+    def currenciesAvailable(self, current): #dostępne waluty
+        current.upper()
         currencyAvailability = False
         if self._currency[current] == True:
             currencyAvailability = True
         return currencyAvailability
     
-    def validation(self, cardNumber, surname):
+    def validation(self, cardNumber, surname): #walidacja użytkownika
         if self._cardNumber == cardNumber and self._surname == surname:
             return True
         else:
             return False
         
-    def currencyTransfer(self):
+    def currencyTransfer(self): #przewalutowanie
     
         fromCurrency = str(input("Podaj walutę do przewalutowania: "))
         toCurrency = str(input("Podaj walutę docelową: "))
+        fromCurrency.upper()
+        toCurrency.upper()
         amount = float(input("Podaj kwotę: "))
         if self.currenciesAvailable(fromCurrency) == True:
             tempMoney = c.convert(amount, fromCurrency, toCurrency)
@@ -115,6 +126,16 @@ class User:
         
         else:
             print("Operacja nieudana")
+        
+    def inHistoryFile(self, type, currencyType, amount):
+        self.file = open(f"transactions/{str(self._cardNumber)}", "a", encoding="utf-8")
+        self.file.write(f"{dtNowString} -> {type}: {currencyType} -> {amount}\n") 
+        self.file.close()
+    def inHistoryFile(self, type):
+        self.file = open(f"transactions/{str(self._cardNumber)}", "a", encoding="utf-8") ##KWARGS i ARGS do dodania
+        self.file.write(f"{dtNowString} -> {type}\n") 
+        self.file.close()    
+        
     
     
 
@@ -122,7 +143,7 @@ class User:
 
 
 
-accountsNum = int(input("Podaj liczbę użytkowników: "))
+accountsNum = int(input("Podaj liczbę użytkowników: ")) #ilość użytkowników
 account = []
 
 for id in range(0, accountsNum):
@@ -140,6 +161,9 @@ while term != 0:
         case 1:
             cardNumber = int(input("Podaj nr karty: "))
             surname = str(input("Podaj nazwisko: "))
+            surname = surname.upper()
+            
+            
     
 
             for id in range(0, accountsNum):
