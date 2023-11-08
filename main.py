@@ -113,8 +113,8 @@ class User:
     
         fromCurrency = str(input("Podaj walutę do przewalutowania: "))
         toCurrency = str(input("Podaj walutę docelową: "))
-        fromCurrency.upper()
-        toCurrency.upper()
+        fromCurrency = fromCurrency.upper()
+        toCurrency = toCurrency.upper()
         amount = float(input("Podaj kwotę: "))
         if self.currenciesAvailable(fromCurrency) == True:
             tempMoney = c.convert(amount, fromCurrency, toCurrency)
@@ -127,14 +127,19 @@ class User:
         else:
             print("Operacja nieudana")
         
-    def inHistoryFile(self, type, currencyType, amount):
-        self.file = open(f"transactions/{str(self._cardNumber)}", "a", encoding="utf-8")
-        self.file.write(f"{dtNowString} -> {type}: {currencyType} -> {amount}\n") 
-        self.file.close()
-    def inHistoryFile(self, type):
-        self.file = open(f"transactions/{str(self._cardNumber)}", "a", encoding="utf-8") ##KWARGS i ARGS do dodania
-        self.file.write(f"{dtNowString} -> {type}\n") 
-        self.file.close()    
+    def inHistoryFile(self, *args):
+
+        if len(args) == 1:
+            self.file = open(f"transactions/{str(self._cardNumber)}", "a", encoding="utf-8") ##KWARGS i ARGS do dodania
+            self.file.write(f"{dtNowString} -> {args[0]}\n") 
+            self.file.close()   
+        else: 
+            
+            self.file = open(f"transactions/{str(self._cardNumber)}", "a", encoding="utf-8")
+            self.file.write(f"{dtNowString} -> {args[0]}: {args[1]} -> {args[2]}\n") 
+            self.file.close()
+   
+       
         
     
     
