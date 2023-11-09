@@ -26,7 +26,7 @@ class User:
             "AUD":0,
             "PLN":0
                         }
-        self._cardNumber = random.randrange(100000, 999999)
+        self._cardNumber =f"000{random.randrange(100000, 999999)}" #numer karty
         self._currienciesNum = 0
         self._currency = {
             "USD":False,
@@ -38,7 +38,7 @@ class User:
                         }
         self.history = []
 
-        self.inHistoryFile("Account created")
+        self._inHistoryFile("Account created")
 
 
 
@@ -62,7 +62,7 @@ class User:
                 if withdrawal <= self._balance[currency]:
                     self._balance[currency] -= withdrawal
                     print("Operacja zakończona pomyślnie")   
-                    self.inHistoryFile(variety, currency, withdrawal)
+                    self._inHistoryFile(variety, currency, withdrawal)
                     if self._balance[currency] == 0:
                         self._currency[currency] = False
                         
@@ -79,7 +79,7 @@ class User:
                 self._balance[currency] += deposit
                 self._currency[currency] = True
                 print("Operacja zakończona pomyślnie")  
-                self.inHistoryFile(variety, currency, deposit) 
+                self._inHistoryFile(variety, currency, deposit) 
                    
 
     def userInfo(self): #info o użytkowniku
@@ -91,7 +91,7 @@ class User:
         for keys in self._balance:
             print(keys, "Kwota: ", self._balance[keys])
    
-    def currenciesAvailable(self, current): #dostępne waluty
+    def _currenciesAvailable(self, current): #dostępne waluty
         current.upper()
         currencyAvailability = False
         if self._currency[current] == True:
@@ -111,19 +111,19 @@ class User:
         fromCurrency = fromCurrency.upper()
         toCurrency = toCurrency.upper()
         amount = float(input("Podaj kwotę: "))
-        if self.currenciesAvailable(fromCurrency) == True:
+        if self._currenciesAvailable(fromCurrency) == True:
             tempMoney = c.convert(amount, fromCurrency, toCurrency)
             
             tempMoney = round(tempMoney, 2)
             self._balance[fromCurrency] -= amount
             self._balance[toCurrency] += tempMoney
             print("Operacja zakończona pomyślnie")
-            self.inHistoryFile(variety, fromCurrency, amount, toCurrency)
+            self._inHistoryFile(variety, fromCurrency, amount, toCurrency)
         
         else:
             print("Operacja nieudana")
         
-    def inHistoryFile(self, *args): #zapis do pliku
+    def _inHistoryFile(self, *args): #zapis do pliku
         match len(args):
             case 1:
                 self.file = open(f"transactions/{str(self._cardNumber)}", "a", encoding="utf-8") ##KWARGS i ARGS do dodania #0 - typ operacji, 1 - waluta, 2 - kwota, 3 - waluta docelowa
@@ -147,14 +147,6 @@ class User:
             os.remove(file)
         
    
-       
-        
-    
-    
-
-
-
-
 
 accountsNum = int(input("Podaj liczbę użytkowników: ")) #ilość użytkowników
 account = []
@@ -172,7 +164,7 @@ while term != 0:
     term = int(input("Wybierz: "))
     match term:
         case 1:
-            cardNumber = int(input("Podaj nr karty: "))
+            cardNumber = str(input("Podaj nr karty: "))
             surname = str(input("Podaj nazwisko: "))
             surname = surname.upper()
             
@@ -212,7 +204,7 @@ while term != 0:
             else:
                 print("Brak użytkownika: ", surname)
 
-print("Do widzenia!")  
+print("Do widzenia!")   
 User.cleanTransactions()                  
 
             #Program do obsługi bankomatu, należy wykonać historię transakcji, wypłatę, wpłatę, przewalutowanie, wyświetlenie informacji o użytkowniku, wylogowanie, wyjście z programu
