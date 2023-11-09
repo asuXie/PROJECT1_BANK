@@ -1,6 +1,8 @@
 import random
 from datetime import datetime
 from currency_converter import CurrencyConverter
+import os
+import glob
 c = CurrencyConverter()
 
 dtNow = datetime.now()
@@ -13,10 +15,6 @@ class User:
         
         name = str(input("Podaj imię: ")) 
         surname = str(input("Podaj nazwisko: "))
-        
-
-
-
         self.id = id
         self._name = name.upper()
         self._surname = surname.upper()
@@ -47,9 +45,7 @@ class User:
         print("Twój numer karty", self._cardNumber)
         
     
-    def typeAssign(self, amount, variety, currency):
-        result = (variety, amount, currency, dtNowString)
-        (self.history).append(result)
+    
 
     def typeShow(self):
         for variety in self.history:
@@ -66,10 +62,10 @@ class User:
                 if withdrawal <= self._balance[currency]:
                     self._balance[currency] -= withdrawal
                     print("Operacja zakończona pomyślnie")   
-                    self.typeAssign(variety, withdrawal, currency)
+                    self.inHistoryFile(variety, currency, withdrawal)
                     if self._balance[currency] == 0:
                         self._currency[currency] = False
-                        self.inHistoryFile(variety, currency, withdrawal)
+                        
                         
 
     def deposit(self): #wpłata
@@ -82,8 +78,7 @@ class User:
             if key == currency:
                 self._balance[currency] += deposit
                 self._currency[currency] = True
-                print("Operacja zakończona pomyślnie")
-                self.typeAssign(variety, deposit, currency)     
+                print("Operacja zakończona pomyślnie")  
                 self.inHistoryFile(variety, currency, deposit) 
                    
 
@@ -110,7 +105,7 @@ class User:
             return False
         
     def currencyTransfer(self): #przewalutowanie
-    
+        variety = "Currency transfer"
         fromCurrency = str(input("Podaj walutę do przewalutowania: "))
         toCurrency = str(input("Podaj walutę docelową: "))
         fromCurrency = fromCurrency.upper()
@@ -123,21 +118,34 @@ class User:
             self._balance[fromCurrency] -= amount
             self._balance[toCurrency] += tempMoney
             print("Operacja zakończona pomyślnie")
+            self.inHistoryFile(variety, fromCurrency, amount, toCurrency)
         
         else:
             print("Operacja nieudana")
         
-    def inHistoryFile(self, *args):
+    def inHistoryFile(self, *args): #zapis do pliku
+        match len(args):
+            case 1:
+                self.file = open(f"transactions/{str(self._cardNumber)}", "a", encoding="utf-8") ##KWARGS i ARGS do dodania #0 - typ operacji, 1 - waluta, 2 - kwota, 3 - waluta docelowa
+                self.file.write(f"{dtNowString} -> {args[0]}\n") 
+                self.file.close()   
+            case 3: 
+                self.file = open(f"transactions/{str(self._cardNumber)}", "a", encoding="utf-8")
+                self.file.write(f"{dtNowString} -> {args[0]}: {args[1]} -> {args[2]}\n") 
+                self.file.close()
+            case 4:
+                self.file = open(f"transactions/{str(self._cardNumber)}", "a", encoding="utf-8")
+                self.file.write(f"{dtNowString} -> {args[0]}: {args[1]} -> {args[3]}: {args[2]}\n") 
+                self.file.close()
 
-        if len(args) == 1:
-            self.file = open(f"transactions/{str(self._cardNumber)}", "a", encoding="utf-8") ##KWARGS i ARGS do dodania
-            self.file.write(f"{dtNowString} -> {args[0]}\n") 
-            self.file.close()   
-        else: 
-            
-            self.file = open(f"transactions/{str(self._cardNumber)}", "a", encoding="utf-8")
-            self.file.write(f"{dtNowString} -> {args[0]}: {args[1]} -> {args[2]}\n") 
-            self.file.close()
+
+        
+    
+    @staticmethod
+    def cleanTransactions():
+        for file in glob.glob("transactions/*"):
+            os.remove(file)
+        
    
        
         
@@ -203,7 +211,9 @@ while term != 0:
             
             else:
                 print("Brak użytkownika: ", surname)
-print("Do widzenia!")                    
+
+print("Do widzenia!")  
+User.cleanTransactions()                  
 
             #Program do obsługi bankomatu, należy wykonać historię transakcji, wypłatę, wpłatę, przewalutowanie, wyświetlenie informacji o użytkowniku, wylogowanie, wyjście z programu
     
