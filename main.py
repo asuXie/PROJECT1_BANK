@@ -11,11 +11,11 @@ dtNowString = dtNow.strftime("%d/%m/%Y %H:%M:%S")
 class Currency:
     pass
 class User:
-    def __init__(self, id):
+    def __init__(self, *args):
         
         name = str(input("Podaj imię: ")) 
         surname = str(input("Podaj nazwisko: "))
-        self.id = id
+        self.id = args[0]
         self._name = name.upper()
         self._surname = surname.upper()
         self._balance = {
